@@ -4,19 +4,7 @@ This repository contains the code for EQT-KD, a lightweight infrared person re-i
 
 ## Dataset
 
-The datasets used in this project are low-resolution infrared person re-identification datasets.
-
-### Low-Resolution SYSU Dataset
-
-Download link:
-
-https://drive.google.com/drive/folders/10z9OGHbDUPH8t5mGl_vaMmy_1CKcGIsK?usp=drive_link
-
-### Low-Resolution RegDB Dataset
-
-Download link:
-
-https://drive.google.com/drive/folders/1yXsAhncgnUsYKSMw5FF6XSNyOmzey-XW?usp=drive_link
+The experiments use DBPerson-Recog-DB1, SYSU-MM01, and the NIR subset of RGBNT201. The datasets are not redistributed in this repository; please obtain them from their providers under their respective terms and generate the low-resolution images as described in [Data preparation](#data-preparation).
 
 ## Pretrained Weight
 
