@@ -75,3 +75,5 @@ if __name__ == '__main__':
             elif n == args.epochs:
                 engine.test()
     engine.close()
+    # keep the final QAT (fake-quant, float) weights for tools/eval_fp32_fq_int8.py
+    torch.save(model_student.state_dict(), osp.join(ckpt.dir, "qat_final_state.pth"))
