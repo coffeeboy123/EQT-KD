@@ -22,7 +22,7 @@ The degradation is applied once, offline, with fixed parameters to all training,
 Each dataset is split into two folds by identity (training and test identities are disjoint). In each fold, about 20% of the images of each training identity form the validation set (2 of 10 images per identity for DBPerson-Recog-DB1, the rounded-up 20% for RGBNT201, and 6 images per identity for SYSU-MM01), and one query image and two gallery images are randomly selected once for each test identity. The query images carry a camera label different from the gallery images, so the camera filter of the evaluator removes no gallery image and all queries are evaluated (247 per fold for SYSU-MM01, 206 for DBPerson-Recog-DB1, 86/85 for RGBNT201).
 
 Datasets used:
-- DBPerson-Recog-DB1 (also distributed as RegDB; `Reg` in the code): thermal images only. File names are parsed as `<...>_<image index>_<identity>.bmp`.
+- DBPerson-Recog-DB1 (also distributed as RegDB; `Reg` in the code): thermal images only. The loader parses the first number in a file name (`<...>_<number>_<identity>.bmp`) as the camera label and the second as the identity; within each identity, the query and gallery images have different first numbers, so the camera filter removes no gallery image.
 - SYSU-MM01: IR images of cameras 3 and 6 (494 identities in our copy, split into two folds of 247 identities); the official cross-modality identity lists are not used.
 - RGBNT201: NIR images (`NI`) of the 171 identities in the `train_141` and `test` folders of the released dataset, split into folds of 85 and 86 identities.
 
@@ -38,7 +38,7 @@ bash scripts/train_eqtkd.sh <data root> <teacher checkpoint dir> [seed]
 ```
 
 Main settings: Adam (learning rate 6 × 10⁻⁴, weight decay 5 × 10⁻⁴) with cosine annealing for 300 epochs, batches of 6 identities × 2 images, loss weights λ_ce = 0.5, λ_ms = 0.5, and λ_kd = 0.25, label smoothing ε = 0.1, KD temperature T = 1.5, KLW scaling δ = 0.01, and MS loss with margin 0.8, similarity threshold 0.5, and scaling factors 2 and 40.
-QAT uses the eager-mode PyTorch quantization API with the default QNNPACK QAT configuration. The backbones are initialized with the ImageNet-pretrained OSNet weights (β = 1.0 for the teacher and β = 0.5 for the student).
+QAT uses the eager-mode PyTorch quantization API with the default QNNPACK QAT configuration. The backbones are initialized with the ImageNet-pretrained OSNet weights released by the authors of OSNet (β = 1.0 for the teacher and β = 0.5 for the student), which are loaded from `~/.cache/torch/checkpoints/osnet_x1_0_imagenet.pth` and `osnet_x0_5_imagenet.pth`.
 
 Random seeds: 251 for all results in the paper; 1 and 2 were additionally used for the repeated runs.
 
