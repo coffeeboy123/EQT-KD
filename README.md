@@ -26,6 +26,8 @@ Datasets used:
 - SYSU-MM01: IR images of cameras 3 and 6 (494 identities in our copy, split into two folds of 247 identities); the official cross-modality identity lists are not used.
 - RGBNT201: NIR images (`NI`) of the 141 identities of the official training set (`train_141`) and the 30 identities of the official test set (`test`), i.e., 171 identities, split into folds of 85 and 86 identities. The 30 official validation identities (in `train_171` but not in `train_141`) are not used.
 
+The file lists of every split of every fold are given in `splits/<dataset>_<fold>.txt` (one line per image: split folder and file name), so the identities and images used in each fold can be traced. For SYSU-MM01, the camera label `1` of the query images was assigned during data preparation and does not indicate the original camera (the IR cameras are 3 and 6); cross-camera matching is therefore not enforced. The SYSU-MM01 identity list was not cross-checked against the official list of available identities.
+
 Expected folder structure of one fold (loaders `SYSU`, `Reg`, `RGBNT201`):
 ```
 <data root>/ReIDataset_SYSU_A/SYSU/{bounding_box_train, bounding_box_validation, query, bounding_box_test}
