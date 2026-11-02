@@ -21,3 +21,4 @@ from .msmt17 import MSMT17
 from .mot17 import MOT17
 from .aicity24 import AICity24Balanced
 from .market1501 import Market1501
+from .rgbnt201 import RGBNT201

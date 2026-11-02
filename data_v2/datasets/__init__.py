@@ -25,6 +25,7 @@ __image_datasets = {
     "mot17": MOT17,
     "aicity24": AICity24Balanced,
     "market1501": Market1501,
+    "rgbnt201": RGBNT201,
 }
 
 
