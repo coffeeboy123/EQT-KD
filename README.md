@@ -24,7 +24,7 @@ Each dataset is split into two folds by identity (training and test identities a
 Datasets used:
 - DBPerson-Recog-DB1 (also distributed as RegDB; `Reg` in the code): thermal images only. The loader parses the first number in a file name (`<...>_<number>_<identity>.bmp`) as the camera label and the second as the identity; within each identity, the query and gallery images have different first numbers, so the camera filter removes no gallery image.
 - SYSU-MM01: IR images of cameras 3 and 6 (494 identities in our copy, split into two folds of 247 identities); the official cross-modality identity lists are not used.
-- RGBNT201: NIR images (`NI`) of the 171 identities in the `train_141` and `test` folders of the released dataset, split into folds of 85 and 86 identities.
+- RGBNT201: NIR images (`NI`) of the 141 identities of the official training set (`train_141`) and the 30 identities of the official test set (`test`), i.e., 171 identities, split into folds of 85 and 86 identities. The 30 official validation identities (in `train_171` but not in `train_141`) are not used.
 
 Expected folder structure of one fold (loaders `SYSU`, `Reg`, `RGBNT201`):
 ```
