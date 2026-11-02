@@ -37,7 +37,7 @@ parser.add_argument('--sampler', type=str, default='True',
                     help='do use sampler in dataloader')
 
 
-parser.add_argument('--model_student', default='LMBN_n_osnet_x0_5_student', help='model name')
+parser.add_argument('--model_student', default='LMBN_n_osnet_x0_5_student_scaling', help='model name (the paper uses LMBN_n_osnet_x0_5_student_scaling, Eq. 8)')
 parser.add_argument('--model_teacher', default='LMBN_n_fusion_3', help='model name')
 parser.add_argument('--teacher_pretrain', type=str, default='C:/Users/Howon_LEE/Downloads/LMBN_n_fusion_3_SYSU_A_6_2_0.0006_12_300_model-best.pth', help='teacher model checkpoint path')
 parser.add_argument('--kl_temp', type=float, default=1.5, help='Temperature for logic KL')

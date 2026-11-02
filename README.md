@@ -19,7 +19,17 @@ https://drive.google.com/drive/folders/1gAPjVMJAg2XUBevBbRS_mbr1bgT93myX?usp=dri
 The low-resolution (LR) IR images follow the protocol of our previous study: each high-resolution image is resized to 256 × 256 pixels with Lanczos interpolation, blurred with a Gaussian filter (σ = 3), downscaled by a factor of four to 64 × 64 pixels, and corrupted with additive Gaussian noise (σ = 10 on the 8-bit intensity scale).
 The degradation is applied once, offline, with fixed parameters to all training, validation, query, and gallery images. At training and test time, the LR images are resized to 384 × 128 pixels with bilinear interpolation.
 
-Each dataset is split into two folds by identity (training and test identities are disjoint). In each fold, 20% of the images of each training identity form the validation set, and one query image and two gallery images are randomly selected for each test identity.
+Each dataset is split into two folds by identity (training and test identities are disjoint). In each fold, about 20% of the images of each training identity form the validation set (2 of 10 images per identity for DBPerson-Recog-DB1, the rounded-up 20% for RGBNT201, and 6 images per identity for SYSU-MM01), and one query image and two gallery images are randomly selected once for each test identity. The query images carry a camera label different from the gallery images, so the camera filter of the evaluator removes no gallery image and all queries are evaluated (247 per fold for SYSU-MM01, 206 for DBPerson-Recog-DB1, 86/85 for RGBNT201).
+
+Datasets used:
+- DBPerson-Recog-DB1 (also distributed as RegDB; `Reg` in the code): thermal images only. File names are parsed as `<...>_<image index>_<identity>.bmp`.
+- SYSU-MM01: IR images of cameras 3 and 6 (494 identities in our copy, split into two folds of 247 identities); the official cross-modality identity lists are not used.
+- RGBNT201: NIR images (`NI`) of the 171 identities in the `train_141` and `test` folders of the released dataset, split into folds of 85 and 86 identities.
+
+Expected folder structure of one fold (loaders `SYSU`, `Reg`, `RGBNT201`):
+```
+<data root>/ReIDataset_SYSU_A/SYSU/{bounding_box_train, bounding_box_validation, query, bounding_box_test}
+```
 
 ### Training
 
@@ -32,11 +42,20 @@ QAT uses the eager-mode PyTorch quantization API with the default QNNPACK QAT co
 
 Random seeds: 251 for all results in the paper; 1 and 2 were additionally used for the repeated runs.
 
+The student model of the paper is `LMBN_n_osnet_x0_5_student_scaling` (KLW: bias-free linear layer C→1, ω = 1 + 0.01·w, Eq. 8); it is the default of `--model_student`. Other student variants in `model/` (e.g., `LMBN_n_osnet_x0_5_student` with a sigmoid-based weight) were not used for the reported results. The rule-based fallback weight in `loss/kd_logic_loss_qaware.py` is not used when the student supplies learned weights, as in all reported results.
+The teacher is `LMBN_n_fusion_3`; the student of each fold must be trained with the teacher checkpoint of the same fold (`--teacher_pretrain`), because the classifier size depends on the training identities of the fold. `train_ablation.bat` is a historical script for the ablations without KD and uses machine-specific paths.
+
+Known behaviors of the code as used for the paper (kept unchanged for reproducibility):
+- Validation uses the training transform and random (not identity-balanced) sampling, and is used only to monitor the loss/accuracy curves.
+- During the per-epoch validation, the fake-quantization observers of the QAT student are not disabled, so the validation images (training identities) also update the activation ranges. Test results are computed on a converted copy. `tools/eval_fp32_fq_int8.py` disables the observers.
+- The seed is set after the models and data manager are constructed, so runs are not bit-wise repeatable; the paper reports the variation over three seeds.
+
 Checkpoint selection: the test set is evaluated during training, and the checkpoint with the highest Rank-1 accuracy (mAP as a tie-breaker) is reported. The final (300th-epoch) checkpoint is also reported in the paper as a reference without test-based selection.
 
 ### Evaluation
 
-INT8 results are obtained by converting the QAT model with `torch.ao.quantization.convert` and evaluating it on the CPU (QNNPACK).
+INT8 results are obtained by converting the QAT model with `torch.ao.quantization.convert` and evaluating it on the CPU (QNNPACK). For all models, the features of each image and its horizontally flipped version are summed; for the student, the eight 256-dimensional BNNeck descriptors are each L2-normalized and concatenated (2048 dimensions), and the distance is one minus the inner product. Re-ranking is not used, and the two folds are averaged with equal weight.
+The inference times in the paper were measured separately (TensorRT `trtexec` on the desktop GPU and Jetson Orin Nano, ONNX on the mobile NPU) and are not produced by this evaluator. The parameter count (2.35 M on SYSU-MM01) includes the training-only classifier heads and KLW; the embedding network has about 1.83 M parameters.
 
 ```bash
 # per-query AP and CMC of a stored checkpoint
